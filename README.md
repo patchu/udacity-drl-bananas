@@ -15,7 +15,7 @@ This project was written and tested on an AWS EC2 instance type of `m6i.xlarge` 
 With `anaconda` or `miniconda` already installed on your computer, type:
 
 ```bash
-conda create -n bananas python=3.6
+conda create -n bananas python=3.8
 conda activate bananas
 
 pip install .
@@ -26,7 +26,7 @@ This will create a Python environment for you and install all required dependenc
 **CAVEATS**
 
 * The `requirements.txt` file is modified from the original Udacity project. Using the file in the original Udacity project resulted in version conflicts, and this is my best guess at a combination of Python package versions that still work.
-* Python 3.6 seems to be the preferred environment for the Bananas app, since the app appears to be over 4 years old, and relies on several outdated Python modules.
+
 
 ### Install the Bananas app
 
@@ -75,7 +75,9 @@ AWS Trainium:
 
 * **dqn_agent_trainium.py**: The AWS Trainium GPU needs an addition Pytorch library and a line added to the optimization step, so I created another file to facilitate switching between Trainium and other GPUs
 
-### More information
+
+
+# More information
 
 For more information about this project, please continue to the
 [**Report**](./Report.md)
