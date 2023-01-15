@@ -196,7 +196,7 @@ The boldfaced training run, which took **310 seconds** and **455 episodes** to s
 
 This is a screen shot of the training report for the fastest run:
 
-![FastestSolve.png](attachment:FastestSolve.png)
+![FastestSolve.png](./FastestSolve.png)
 
 <a id="results-part-2-training-is-faster-on-cpu-than-gpu"></a>
 ### Results, part 2: Training is faster on CPU than GPU??
