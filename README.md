@@ -75,3 +75,8 @@ AWS Trainium:
 
 * **dqn_agent_trainium.py**: The AWS Trainium GPU needs an addition Pytorch library and a line added to the optimization step, so I created another file to facilitate switching between Trainium and other GPUs
 
+### More information
+
+For more information about this project, please continue to the
+[**Report**](./Report.md)
+
