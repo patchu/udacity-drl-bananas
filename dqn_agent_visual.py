@@ -1,8 +1,12 @@
+# NOTE: Pytorch support for the M1 chip first appears in version 1.13
+#       conda install -c conda-forge pytorch==1.13
+
 import numpy as np
 import random
 from collections import namedtuple, deque
 
-from model import QNetwork
+from model_pixel import QNetwork
+from PIL import Image
 
 import torch
 import torch.nn.functional as F
@@ -15,8 +19,9 @@ TAU = 1e-3              # for soft update of target parameters
 LR = 5e-4               # learning rate
 UPDATE_EVERY = 6        # how often to update the network
 NN_LOOPS = 1            # how many times to loop the NN for every update
+RESIZE_IMG = 30
 
-# device = torch.device("cpu")
+device = torch.device("cpu")
 if torch.cuda.is_available():
     device = torch.device("cuda:0")
 elif hasattr(torch, 'backends') and hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
@@ -70,6 +75,7 @@ def convert_state_not_used(state):
     )))
 
 
+
 class Agent():
     """Interacts with and learns from the environment."""
 
@@ -82,15 +88,18 @@ class Agent():
             action_size (int): dimension of each action
             seed (int): random seed
         """
-        self.state_size = state_size
+        self.state_size = RESIZE_IMG * RESIZE_IMG * 3
         self.action_size = action_size
 
         # disabling seed so we can get random behavior
         # self.seed = random.seed(seed)
 
         # Q-Network
-        self.qnetwork_local = QNetwork(self.state_size, action_size, seed, 2048, 2048, 2048).to(device)
-        self.qnetwork_target = QNetwork(self.state_size, action_size, seed, 2048, 2048, 2048).to(device)
+        # self.qnetwork_local = QNetwork(self.state_size, action_size, seed, [64, 128, 256], 128).to(device)
+        # self.qnetwork_target = QNetwork(self.state_size, action_size, seed, [64, 128, 256], 128).to(device)
+
+        self.qnetwork_local = QNetwork(self.state_size, action_size, seed, [32, 64, 0], [1024, 0]).to(device)
+        self.qnetwork_target = QNetwork(self.state_size, action_size, seed, [32, 64, 0], [1024, 0]).to(device)
         self.optimizer = optim.Adam(self.qnetwork_local.parameters(), lr=LR)
 
         # Replay memory
@@ -98,7 +107,34 @@ class Agent():
         # Initialize time step (for updating every UPDATE_EVERY steps)
         self.t_step = 0
 
+    def convert_visual_state(self, state):
+        """Convert visual input into numpy array"""
+
+        return np.moveaxis(state, 3, 1)
+
+
+        # examine the state space
+        state = np.squeeze(state)
+        width, height, c = state.shape
+
+        imgbytes = np.uint8(state * 255)
+        img = Image.fromarray(imgbytes)
+
+        # focus on only the playing field area
+        img = img.crop((0, 30, width, height))
+
+        img = img.resize((RESIZE_IMG, RESIZE_IMG))
+        img_ar = np.array(img) / 255
+
+        img_ar = np.expand_dims(img_ar, axis=0)
+        return np.moveaxis(img_ar, 3, 1)
+        # return img_ar.flatten()
+
+
     def step(self, state, action, reward, next_state, done):
+        state = self.convert_visual_state(state)
+        next_state = self.convert_visual_state(next_state)
+
         # Save experience in replay memory
         self.memory.add(state, action, reward, next_state, done)
 
@@ -123,7 +159,8 @@ class Agent():
             state (array_like): current state
             eps (float): epsilon, for epsilon-greedy action selection
         """
-        state = torch.from_numpy(state).float().unsqueeze(0).to(device)
+        state = self.convert_visual_state(state)
+        state = torch.from_numpy(state).float().to(device)
 
         self.qnetwork_local.eval()
         with torch.no_grad():

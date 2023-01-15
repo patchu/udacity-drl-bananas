@@ -60,4 +60,18 @@ This project contains the following files:
 * **requirement.txt**: A modified version of the original requirements.txt, listing all the versions of all the Python libraries required to get this project working
 * **setup.py** Used with `requirements.txt` to set up the project
 
+Fastest solve files:
+
+* **Fastest.ipynb**: Notebook with the results of the fastest agent solve
+* **fastest_checkpoint.pth**: the `checkpoint.pth` file for the fastest agent solve
+
+Visual agent training:
+
+* **Bananas_Pixels.ipynb**: The main Jupyter notebook that runs the raw pixel agent training
+* **dqn_agent_visual.py**: The DQN agent for raw pixel training
+* **model_pixel.py**: 2 or 3 block CNN to support DQN agent for raw pixel training
+
+AWS Trainium:
+
+* **dqn_agent_trainium.py**: The AWS Trainium GPU needs an addition Pytorch library and a line added to the optimization step, so I created another file to facilitate switching between Trainium and other GPUs
 

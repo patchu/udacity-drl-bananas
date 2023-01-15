@@ -7,6 +7,7 @@ from model import QNetwork
 import torch
 import torch.nn.functional as F
 import torch.optim as optim
+import torch_xla.core.xla_model as xm
 
 BUFFER_SIZE = int(1e5)  # replay buffer size
 BATCH_SIZE = 128        # minibatch size
@@ -17,11 +18,12 @@ UPDATE_EVERY = 6        # how often to update the network
 NN_LOOPS = 1            # how many times to loop the NN for every update
 
 # device = torch.device("cpu")
-if torch.cuda.is_available():
-    device = torch.device("cuda:0")
-elif hasattr(torch, 'backends') and hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
-    device = torch.device("mps")
+# if torch.cuda.is_available():
+#     device = torch.device("cuda:0")
+# elif hasattr(torch, 'backends') and hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
+#     device = torch.device("mps")
 
+device = torch.device("xla")
 # force CPU
 # device = torch.device("cpu")
 print('torch device = ', device)
@@ -124,6 +126,8 @@ class Agent():
             eps (float): epsilon, for epsilon-greedy action selection
         """
         state = torch.from_numpy(state).float().unsqueeze(0).to(device)
+        # if(state.shape[1] == 0):
+        #     print('zero state', state)
 
         self.qnetwork_local.eval()
         with torch.no_grad():
@@ -160,6 +164,7 @@ class Agent():
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        xm.mark_step()
 
         # ------------------- update target network ------------------- #
         if suppress_udpate != True:
